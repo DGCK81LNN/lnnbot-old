@@ -1,0 +1,17 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Start MCL Server",
+            "type": "shell",
+            "command": "cd E:\\LNNSoftware\\mirai-console-loader&mcl",
+            "problemMatcher": [],
+        },
+        {
+            "label": "Launch Bot",
+            "type": "shell",
+            "command": "%npmpath%\\ts-node src/index.ts",
+            "problemMatcher": []
+        }
+    ]
+}

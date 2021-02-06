@@ -1,53 +1,44 @@
 import {
-    //Api,
-    //Config,
-    //Contact,
-    //EventType,
-    //Logger,
     Message,
     MessageType,
-    //Mirai,
-    //MiraiInstance,
-    //MiraiApiHttp,
-    //MiraiApiHttpConfig,
-    //check,
-    //template,
 } from "mirai-ts";
+import { SendReplyFunction, Command } from "./types";
+import commandL from "./command-l";
+import log from "./log"
 
-export function handleCommand(messageChain: MessageType.MessageChain): Promise<MessageType.MessageChain> {
+export async function handleCommand(
+    messageChain: MessageType.MessageChain,
+    sendReply: SendReplyFunction
+) {
     let text = "";
     for (let part of messageChain)
         if (part.type === 'Plain')
             text += part.text;
-    let match = text.match(/^\s?\/([A-Za-z]+)(.*)$/); // match commands
-    console.log({ text, match });
+    let match = text.match(/^\s*\/([A-Za-z]+)\s?([^]*)$/); // match commands
     if (match) {
-        let reply = executeCommand(match[1], match[2]);
-        console.log(reply);
-        return reply;
+        let commandName = match[1].toLowerCase(),
+            commandParams = match[2];
+        log(`运行指令“${commandName}”，参数：“${commandParams}”`, 1);
+        await executeCommand(commandName, commandParams, sendReply);
+        log(`运行指令完成`, -1);
     }
     // TODO: Handle messages that aren't commands
+    else log(`收到的消息“${text}”不是指令`);
 }
 
-function executeCommand(commandName: string, param: string): Promise<MessageType.MessageChain> {
-    if (commands.has(commandName.toLowerCase()))
-        return commands.get(commandName)(param);
-    return nullCommand();
+function executeCommand(commandName: string, param: string, sendReply: SendReplyFunction) {
+    return commands.has(commandName) ?
+        commands.get(commandName)(param, sendReply)
+        : sendReply(Message.Plain("无效指令，At我发送“/help”查看帮助。"));
 }
 
-const commands = new Map<string, (param: string) => Promise<MessageType.MessageChain>>();
-commands.set("help", async _ => [Message.Plain(
+const commands = new Map<string, Command>();
+commands.set("help", (_, sendReply) => sendReply(Message.Plain(
     "LNNBot目前还处于测试阶段，以后会添加更多功能。\n" +
     "尖括号（<>）表示必填参数，方括号（[]）表示可选参数。\n" +
     "/help → 显示此帮助信息\n" +
     "/hello → Hello, world!\n" +
-    "/l <参数> → 带参数指令测试"
-)]);
-commands.set("hello", async _ => [Message.Plain("Hello, world!")]);
-commands.set("l", async param => [
-    Message.Plain(param.trim() ? `参数内容：${param}` : "请提供参数：\n/l <参数>")
-]);
-
-async function nullCommand(): Promise<MessageType.MessageChain> {
-    return [Message.Plain("无效指令，At我发送“/help”查看帮助。")];
-}
+    "/l <查询内容> → 查询av号、BV号信息"
+)));
+commands.set("hello", (_, sendReply) => sendReply(Message.Plain("Hello, world!")));
+commands.set("l", commandL);

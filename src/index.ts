@@ -7,7 +7,7 @@ import {
     MessageType,
     Mirai,
     //MiraiInstance,
-    MiraiApiHttp,
+    //MiraiApiHttp,
     MiraiApiHttpConfig,
     Message,
     //check,
@@ -24,26 +24,21 @@ const mahConfig: MiraiApiHttpConfig = {
 
 const bot = new Mirai(mahConfig);
 
-(async () => {
-    await bot.link(qq);
+function handleGroupMessage(event: MessageType.GroupMessage) {
+    if (!event.isAt())
+        return;
+    BotCommandHandler.handleCommand(event.messageChain, (...parts) => event.reply([
+        Message.At(event.sender.id),
+        Message.Plain(" "),
+        ...parts
+    ], true)
+    );
+}
+function handleSingleMessage(event: MessageType.FriendMessage | MessageType.TempMessage) {
+    BotCommandHandler.handleCommand(event.messageChain, (...parts) => event.reply(parts, true));
+}
 
-    async function handleGroupMessage(event: MessageType.GroupMessage) {
-        if (!event.isAt())
-            return;
-        let reply = await BotCommandHandler.handleCommand(event.messageChain);
-        if (reply)
-            event.reply([
-                Message.At(event.sender.id),
-                Message.Plain(" "),
-                ...reply
-            ], true);
-    }
-    async function handleSingleMessage(event: MessageType.FriendMessage | MessageType.TempMessage) {
-        let reply = await BotCommandHandler.handleCommand(event.messageChain);
-        if (reply)
-            event.reply(reply, true);
-    }
-
+bot.link(qq).then(() => {
     bot.on("GroupMessage", handleGroupMessage);
     bot.on("FriendMessage", handleSingleMessage);
     bot.on("TempMessage", handleSingleMessage);
@@ -56,9 +51,5 @@ const bot = new Mirai(mahConfig);
             ]);
     });
 
-    bot.on("BotOnlineEvent", event => {
-        bot.api.sendGroupMessage("Hello, world!", 773864545);
-    })
-
     bot.listen();
-})();
+});

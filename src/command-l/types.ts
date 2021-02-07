@@ -5,7 +5,7 @@ export type ResponseWrapper<T> = {
     code: string,
     message?: string,
     msg?: string,
-    data: T,
+    data?: T,
 }
 
 export type VideoViewResponse = {
@@ -103,3 +103,32 @@ export type UserOfficial = {
     desc: string,
 }
 export enum UserOfficialRole { None, Celebrity, Identity, Company, Media, Government, Organization }
+
+export type CommentsResponse = {
+    cursor?: { all_count?: number },
+    top?: { upper: CommentMain<CommentMain> },
+    replies?: CommentMain<CommentMain>[],
+    hots?: CommentMain<CommentMain>[],
+    upper?: { mid?: number }
+};
+export type CommentMain<T = void> = {
+    floor?: number,
+    ctime?: number,
+    like?: number,
+    member?: {
+        mid?: number,
+        uname?: string,
+        avatar?: string,
+        level_info?: { current_level: 0 | 1 | 2 | 3 | 4 | 5 | 6 },
+        official_verify?: {
+            desc: string,
+        },
+        vip?: {
+            vipStatus: Uint1,
+            vipType: UserVipType,
+        },
+    },
+    content?: { message?: string },
+    rcount?: number,
+    replies?: T extends void ? void : T[],
+}

@@ -1,5 +1,6 @@
 export const BV_ALPHABET = 'fZodR9XQDSUm21yCkr6zBqiveYah8bt4xsWpHnJE7jL5VG3guMTKNPAwcF';
 export const AV_REG = /^av[1-9][0-9]*$/i;
+export const BV_REG_STRICT = /^BV?(1[1-9A-HJ-NP-Za-km-z]{2}4[1-9A-HJ-NP-Za-km-z]1[1-9A-HJ-NP-Za-km-z]7[1-9A-HJ-NP-Za-km-z]{2})$/i;
 export const BV_REG = /^BV?([1-9A-HJ-NP-Za-km-z]{10})$/i;
 export const BV_REORDER = [6, 2, 4, 8, 5, 9, 3, 7, 1, 0];
 export const BV_XORAND = 177451812;
@@ -17,6 +18,8 @@ export function av2bv(av: number | string) {
             throw new RangeError(`av2bv(${dump}): AV号必须大于0`);
         else if (!Number.isInteger(num))
             throw new RangeError(`av2bv(${dump}): AV号必须是整数`);
+        else if (num > 2147483647)
+            throw new RangeError(`av2bv(${dump}): AV号过大`);
     }
     else {
         if (av.match(AV_REG))
@@ -46,7 +49,7 @@ export function bv2av(bv: string) {
     let dump = JSON.stringify(bv);
     let str = '';
 
-    let match = bv.match(BV_REG);
+    let match = bv.match(BV_REG_STRICT);
     if (match)
         str = match[1];
     else
@@ -63,7 +66,7 @@ export function bv2av(bv: string) {
         num += num58[i] - BV_ADDAND[i];
     }
     if (num > 2147483647)
-        throw new RangeError(`bv2av(${dump}): AV号溢出 (${num} > 2147483647)`);
+        throw new RangeError(`bv2av(${dump}): 溢出 (${num} > 2147483647)`);
     num ^= BV_XORAND;
 
     return num;

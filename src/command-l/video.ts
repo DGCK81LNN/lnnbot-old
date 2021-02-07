@@ -6,7 +6,6 @@ import {
     VideoAttribute,
     VideoCopyright,
     VideoViewResponse,
-    VideoTagsResponse,
 } from "./types";
 import log from "../log";
 import { Avbv, formatDuration, formatTime, formatStatistic } from "./utils";
@@ -48,53 +47,36 @@ export default async function video<T extends "aid" | "bvid">(type: T, id: T ext
 
         await sendReply(
             Message.Image(null, data.pic),
-            Message.Plain(
-                `
-${data.title}
-
-${data.staff?.length ?
-                    `【制作组】\n${data.staff.map(staff => `〖${staff.title}〗${staff.name}（UID: ${staff.mid}）`).join("\n")}`
+            Message.Plain(`\n` +
+                `${data.title}\n` +
+                `\n` +
+                (data.staff?.length ?
+                    `【制作组】\n` +
+                    data.staff.map(staff =>
+                        `〖${staff.title}〗${staff.name}（UID: ${staff.mid}）`
+                    ).join("\n")
                     : `【UP主】${data.owner.name}（UID: ${data.owner.mid}）`
-                }
-【时长】${formatDuration(data.duration)}　【版权】${data.copyright === VideoCopyright.Original ? "自制" : "转载"}　【二级分区】${data.tname}
-【发布日期】${formatTime(data.pubdate)}
-【AV号】av${data.aid}　【BV号】${data.bvid}
-${attributes.length ? `【属性】${attributes.join(" - ")}\n` : ""}
-【简介】
-${data.desc}
-
-【播放】${formatStatistic(data.stat.view)}　【弹幕】${formatStatistic(data.stat.danmaku)}
-【点赞】${formatStatistic(data.stat.like)}　【投币】${formatStatistic(data.stat.coin)}　【收藏】${formatStatistic(data.stat.favorite)}
-【转发】${formatStatistic(data.stat.share)}　【评论】${formatStatistic(data.stat.reply)}
-
-【分P】${data.pages.length}个
-${data.pages.map(page => `${page.page}. ${page.part} （${formatDuration(page.duration)}）`).join("\n")}`
+                ) + "\n" +
+                `【时长】${formatDuration(data.duration)}　【版权】${data.copyright === VideoCopyright.Original ? "自制" : "转载"}　【二级分区】${data.tname}\n` +
+                `【发布日期】${formatTime(data.pubdate)}\n` +
+                `【AV号】av${data.aid}　【BV号】${data.bvid}\n` +
+                (attributes.length ? `【属性】${attributes.join(" - ")}\n` : "") + "\n" +
+                `【简介】\n` +
+                data.desc + "\n" +
+                `\n` +
+                `【播放】${formatStatistic(data.stat.view)}　【弹幕】${formatStatistic(data.stat.danmaku)}\n` +
+                `【点赞】${formatStatistic(data.stat.like)}　【投币】${formatStatistic(data.stat.coin)}　【收藏】${formatStatistic(data.stat.favorite)}\n` +
+                `【转发】${formatStatistic(data.stat.share)}　【评论】${formatStatistic(data.stat.reply)}\n` +
+                `\n` +
+                `【分P】${data.pages.length}个\n` +
+                data.pages.map(page => `${page.page}. ${page.part} （${formatDuration(page.duration)}）`).join("\n") + "\n" +
+                `\n` +
+                `输入 /l <AV号或BV号> -tags 查询视频的标签。\n` +
+                `输入 /l <AV号或BV号> -comments 查询视频的评论（刷屏警告）。\n` +
+                `输入 /l <AV号或BV号> -comments -oldest 查询视频的10条最旧评论。\n` +
+                `输入 /l <AV号或BV号> -comments -latest 查询视频的最新评论。`
             ),
         );
-        log(`查询视频标签`, 1);
-        try {
-            let response = await axios.get<ResponseWrapper<VideoTagsResponse>>(`https://api.bilibili.com/x/tag/archive/tags?${type}=${id}`, { responseType: "json" });
-            let wrapper = response.data;
-            if (wrapper.code || !wrapper.data) {
-                log(`服务器错误`, -1);
-                console.log(wrapper);
-                await sendReply(localConvertAVBV(`查询视频标签时出现服务器错误 ${wrapper.code}：${wrapper.message}`, id));
-                return;
-            }
-            let data = wrapper.data;
-
-            await sendReply(
-                Message.Plain(`【标签】
-${data.map(tag => `#${tag.tag_name}（ID: ${tag.tag_id}） - ${tag.short_content}`).join("\n")}`
-                )
-            );
-            log(`成功`, -1);
-        }
-        catch (error) {
-            log(`运行时错误`, -1);
-            console.error(error);
-            await sendReply(localConvertAVBV(`查询视频标签时出错：${error}`, id));
-        }
         log(`成功`, -1);
     }
     catch (error) {

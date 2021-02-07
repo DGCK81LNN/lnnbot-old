@@ -3,7 +3,7 @@ import {
     //Config,
     //Contact,
     //EventType,
-    //Logger,
+    Logger,
     MessageType,
     Mirai,
     //MiraiInstance,
@@ -27,15 +27,21 @@ const bot = new Mirai(mahConfig);
 function handleGroupMessage(event: MessageType.GroupMessage) {
     if (!event.isAt())
         return;
-    BotCommandHandler.handleCommand(event.messageChain, (...parts) => event.reply([
-        Message.At(event.sender.id),
-        Message.Plain(" "),
-        ...parts
-    ], true)
+    BotCommandHandler.handleCommand(event.messageChain, (...parts) => {
+        //console.log(parts);
+        return event.reply([
+            Message.At(event.sender.id),
+            Message.Plain(" "),
+            ...parts
+        ], true);
+    }
     );
 }
 function handleSingleMessage(event: MessageType.FriendMessage | MessageType.TempMessage) {
-    BotCommandHandler.handleCommand(event.messageChain, (...parts) => event.reply(parts, true));
+    BotCommandHandler.handleCommand(event.messageChain, (...parts) => {
+        //console.log(parts);
+        return event.reply(parts, true);
+    });
 }
 
 bot.link(qq).then(() => {

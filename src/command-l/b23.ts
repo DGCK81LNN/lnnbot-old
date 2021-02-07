@@ -16,7 +16,7 @@ export default async function b23(id: string, sendReply: SendReplyFunction) {
         if (response.status !== 302) {
             log(`服务器错误`, -1);
             console.log(wrapper);
-            sendReply(Message.Plain(`服务器错误 ${wrapper.code}：${wrapper.message}`));
+            await sendReply(Message.Plain(`服务器错误 ${wrapper.code}：${wrapper.message}`));
         }
         await sendReply(Message.Plain(`短网址指向：${response.headers.location}`));
         log(`成功`, -1);

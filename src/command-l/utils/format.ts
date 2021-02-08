@@ -1,5 +1,3 @@
-import log from "../../log";
-
 export function formatDuration(seconds: number) {
     let result = seconds >= 3600 ?
         `${Math.floor(seconds / 3600)}:${String(Math.floor(seconds / 60) % 60).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`

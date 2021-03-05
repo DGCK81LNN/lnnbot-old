@@ -18,8 +18,10 @@ export default async function b23(id: string, sendReply: SendReplyFunction) {
             console.log(wrapper);
             await sendReply(Message.Plain(`服务器错误 ${wrapper.code}：${wrapper.message}`));
         }
-        await sendReply(Message.Plain(`短网址指向：${response.headers.location}`));
-        logger.success(`成功`);
+        else {
+            await sendReply(Message.Plain(`短网址指向：${response.headers.location}`));
+            logger.success(`成功`);
+        }
     }
     catch (error) {
         logger.error(error);
